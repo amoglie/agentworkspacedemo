@@ -1,22 +1,13 @@
 "use client"
 
-import { Clock, PhoneIncoming, PhoneOutgoing, Mic, MicOff, PhoneOff, Pause, Play, MessageCircle, Mail, ArrowRightLeft } from "lucide-react"
+import { Clock, PhoneIncoming, PhoneOutgoing, PhoneOff, MessageCircle, Mail } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useState, useEffect } from "react"
 import { CallClosureDialog, type CallClosureData } from "./call-closure-dialog"
 
 export type ChannelType = "inbound_call" | "outbound_call" | "whatsapp" | "email"
-
-const transferQueues = [
-  { value: "ventas", label: "Ventas" },
-  { value: "soporte_premium", label: "Soporte Premium" },
-  { value: "reclamos", label: "Reclamos" },
-  { value: "supervisor", label: "Supervisor" },
-  { value: "backoffice", label: "Back Office" },
-]
 
 interface ContactContextProps {
   contact: {
@@ -30,24 +21,11 @@ interface ContactContextProps {
     attributes: Record<string, string>
   }
   onCallClosure?: (data: CallClosureData) => void
-  onTransfer?: (destination: string) => void
 }
 
-export function ContactContext({ contact, onCallClosure, onTransfer }: ContactContextProps) {
+export function ContactContext({ contact, onCallClosure }: ContactContextProps) {
   const [duration, setDuration] = useState("00:00")
-  const [isMuted, setIsMuted] = useState(false)
-  const [isOnHold, setIsOnHold] = useState(false)
   const [showClosureDialog, setShowClosureDialog] = useState(false)
-  const [selectedTransfer, setSelectedTransfer] = useState("")
-  const [showTransferOptions, setShowTransferOptions] = useState(false)
-
-  const handleTransfer = () => {
-    if (selectedTransfer && onTransfer) {
-      onTransfer(selectedTransfer)
-      setSelectedTransfer("")
-      setShowTransferOptions(false)
-    }
-  }
 
   const handleEndContact = () => {
     setShowClosureDialog(true)
@@ -129,106 +107,19 @@ export function ContactContext({ contact, onCallClosure, onTransfer }: ContactCo
           </div>
 
           {isVoiceChannel && (
-            <div className="flex flex-col gap-3">
-              <div className="flex justify-center gap-2 flex-wrap">
-                <Button
-                  size="default"
-                  variant={isMuted ? "default" : "outline"}
-                  onClick={() => setIsMuted(!isMuted)}
-                  className="gap-2 rounded-full px-4"
-                >
-                  {isMuted ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
-                  {isMuted ? "Silenciado" : "Silenciar"}
-                </Button>
-                <Button
-                  size="default"
-                  variant={isOnHold ? "default" : "outline"}
-                  onClick={() => setIsOnHold(!isOnHold)}
-                  className="gap-2 rounded-full px-4"
-                >
-                  {isOnHold ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
-                  {isOnHold ? "Reanudar" : "En espera"}
-                </Button>
-                <Button
-                  size="default"
-                  variant={showTransferOptions ? "default" : "outline"}
-                  onClick={() => setShowTransferOptions(!showTransferOptions)}
-                  className="gap-2 rounded-full px-4"
-                >
-                  <ArrowRightLeft className="w-4 h-4" />
-                  Transferir
-                </Button>
-                <Button size="default" variant="destructive" className="gap-2 rounded-full px-4" onClick={handleEndContact}>
-                  <PhoneOff className="w-4 h-4" />
-                  Colgar
-                </Button>
-              </div>
-              {showTransferOptions && (
-                <div className="flex justify-center gap-2 p-3 rounded-xl bg-muted/50">
-                  <Select value={selectedTransfer} onValueChange={setSelectedTransfer}>
-                    <SelectTrigger className="w-48">
-                      <SelectValue placeholder="Seleccionar destino" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {transferQueues.map((queue) => (
-                        <SelectItem key={queue.value} value={queue.value}>
-                          {queue.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Button onClick={handleTransfer} disabled={!selectedTransfer} className="rounded-full">
-                    Confirmar
-                  </Button>
-                </div>
-              )}
+            <div className="flex justify-center">
+              <Button size="default" variant="destructive" className="gap-2 rounded-full px-6" onClick={handleEndContact}>
+                <PhoneOff className="w-4 h-4" />
+                Finalizar Llamada
+              </Button>
             </div>
           )}
 
           {isChatChannel && (
-            <div className="flex flex-col gap-3">
-              <div className="flex justify-center gap-2 flex-wrap">
-                <Button
-                  size="default"
-                  variant={isOnHold ? "default" : "outline"}
-                  onClick={() => setIsOnHold(!isOnHold)}
-                  className="gap-2 rounded-full px-4"
-                >
-                  {isOnHold ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
-                  {isOnHold ? "Reanudar" : "En Espera"}
-                </Button>
-                <Button
-                  size="default"
-                  variant={showTransferOptions ? "default" : "outline"}
-                  onClick={() => setShowTransferOptions(!showTransferOptions)}
-                  className="gap-2 rounded-full px-4"
-                >
-                  <ArrowRightLeft className="w-4 h-4" />
-                  Transferir
-                </Button>
-                <Button size="default" variant="destructive" className="gap-2 rounded-full px-4" onClick={handleEndContact}>
-                  Finalizar
-                </Button>
-              </div>
-              {showTransferOptions && (
-                <div className="flex justify-center gap-2 p-3 rounded-xl bg-muted/50">
-                  <Select value={selectedTransfer} onValueChange={setSelectedTransfer}>
-                    <SelectTrigger className="w-48">
-                      <SelectValue placeholder="Seleccionar destino" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {transferQueues.map((queue) => (
-                        <SelectItem key={queue.value} value={queue.value}>
-                          {queue.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Button onClick={handleTransfer} disabled={!selectedTransfer} className="rounded-full">
-                    Confirmar
-                  </Button>
-                </div>
-              )}
+            <div className="flex justify-center">
+              <Button size="default" variant="destructive" className="gap-2 rounded-full px-6" onClick={handleEndContact}>
+                Finalizar Chat
+              </Button>
             </div>
           )}
         </CardContent>

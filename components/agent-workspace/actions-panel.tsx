@@ -287,7 +287,7 @@ export function ActionsPanel({
         </Tabs>
       </Card>
 
-      <Card className="border-border flex-1 flex flex-col min-h-0 shadow-sm">
+      <Card className="border-border flex-1 flex flex-col min-h-[400px] shadow-sm">
         <CardHeader className="pb-3">
           <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide flex items-center gap-2">
             <History className="w-4 h-4" />

@@ -626,7 +626,7 @@ export default function AgentWorkspace() {
       <main className="flex-1 p-6 overflow-hidden">
         <div className="h-full grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-1 min-h-0 overflow-auto flex flex-col gap-4">
-            <ContactContext contact={currentContact} onCallClosure={handleCallClosure} onTransfer={handleTransfer} />
+            <ContactContext contact={currentContact} onCallClosure={handleCallClosure} />
             {currentView === "outbound_call" && (
               <OutboundTasksPanel
                 tasks={outboundTasks}
