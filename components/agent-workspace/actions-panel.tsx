@@ -1,7 +1,7 @@
 "use client"
 
 import { 
-  Plus, FileText, 
+  Plus, Send, FileText, 
   MessageSquare, History, Clock, CheckCircle, AlertCircle, User,
   PhoneIncoming, PhoneOutgoing, PhoneMissed, Calendar, XCircle
 } from "lucide-react"
