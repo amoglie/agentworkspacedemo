@@ -1,6 +1,6 @@
 "use client"
 
-import { Clock, PhoneOutgoing, MessageCircle, User, Phone, Send } from "lucide-react"
+import { Clock, PhoneOutgoing, MessageCircle, User, Phone } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -56,7 +56,7 @@ export function OutboundContact({
       color: "bg-[#25D366]/10 text-[#25D366]",
       badgeColor: "bg-[#25D366]/10 text-[#25D366] border-0",
       actionLabel: "Iniciar Conversación",
-      actionIcon: Send
+      actionIcon: MessageCircle
     },
   }
 
