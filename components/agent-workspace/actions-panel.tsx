@@ -41,7 +41,6 @@ const typificationOptions = [
   { value: "solicitud_producto", label: "Solicitud de Producto" },
   { value: "actualizacion_datos", label: "Actualización de Datos" },
   { value: "soporte_tecnico", label: "Soporte Técnico" },
-  { value: "whatsapp", label: "Envío WhatsApp" },
   { value: "otros", label: "Otros" },
 ]
 
@@ -76,8 +75,6 @@ export function ActionsPanel({
   const [selectedCaseType, setSelectedCaseType] = useState("")
   const [caseDescription, setCaseDescription] = useState("")
 
-  const isWhatsappSelected = selectedTypification === "whatsapp"
-
   const handleAddNote = () => {
     if (note.trim()) {
       onAddNote(note)
@@ -95,13 +92,8 @@ export function ActionsPanel({
 
   const handleTypify = () => {
     if (selectedTypification) {
-      if (isWhatsappSelected && selectedWhatsappTemplate) {
-        onSendWhatsApp(selectedWhatsappTemplate)
-      } else if (!isWhatsappSelected) {
-        onTypify(selectedTypification)
-      }
+      onTypify(selectedTypification)
       setSelectedTypification("")
-      setSelectedWhatsappTemplate("")
     }
   }
 
@@ -188,10 +180,7 @@ export function ActionsPanel({
               <div className="space-y-2">
                 <label className="text-xs text-muted-foreground uppercase tracking-wide font-medium">Tipificación</label>
                 <div className="flex gap-2">
-                  <Select value={selectedTypification} onValueChange={(value) => {
-                    setSelectedTypification(value)
-                    if (value !== "whatsapp") setSelectedWhatsappTemplate("")
-                  }}>
+                  <Select value={selectedTypification} onValueChange={setSelectedTypification}>
                     <SelectTrigger className="flex-1">
                       <SelectValue placeholder="Seleccionar tipificación" />
                     </SelectTrigger>
@@ -207,34 +196,44 @@ export function ActionsPanel({
                     size="icon" 
                     variant="outline" 
                     onClick={handleTypify} 
-                    disabled={!selectedTypification || (isWhatsappSelected && !selectedWhatsappTemplate)}
+                    disabled={!selectedTypification}
                   >
                     <Tag className="w-4 h-4" />
                   </Button>
                 </div>
-                {isWhatsappSelected && (
-                  <div className="space-y-2 p-3 rounded-lg bg-[#25D366]/5 border border-[#25D366]/20">
-                    <label className="text-xs text-muted-foreground uppercase tracking-wide font-medium flex items-center gap-2">
-                      <MessageSquare className="w-3.5 h-3.5 text-[#25D366]" />
-                      Template de WhatsApp
-                    </label>
-                    <Select value={selectedWhatsappTemplate} onValueChange={setSelectedWhatsappTemplate}>
-                      <SelectTrigger className="w-full border-[#25D366]/30 focus:ring-[#25D366]/20">
-                        <SelectValue placeholder="Seleccionar template aprobado" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {whatsappTemplates.map((template) => (
-                          <SelectItem key={template.value} value={template.value}>
-                            {template.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <p className="text-xs text-muted-foreground">
-                      Templates aprobados para envío a clientes
-                    </p>
-                  </div>
-                )}
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs text-muted-foreground uppercase tracking-wide font-medium flex items-center gap-2">
+                  <MessageSquare className="w-4 h-4 text-[#25D366]" />
+                  Enviar WhatsApp
+                </label>
+                <div className="flex gap-2">
+                  <Select value={selectedWhatsappTemplate} onValueChange={setSelectedWhatsappTemplate}>
+                    <SelectTrigger className="flex-1 border-[#25D366]/30 focus:ring-[#25D366]/20">
+                      <SelectValue placeholder="Seleccionar template" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {whatsappTemplates.map((template) => (
+                        <SelectItem key={template.value} value={template.value}>
+                          {template.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Button 
+                    size="icon" 
+                    variant="outline"
+                    className="border-[#25D366]/30 hover:bg-[#25D366]/10 hover:text-[#25D366]"
+                    onClick={handleSendWhatsApp} 
+                    disabled={!selectedWhatsappTemplate}
+                  >
+                    <Send className="w-4 h-4" />
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Templates aprobados para envío a clientes
+                </p>
               </div>
 
               <div className="space-y-2">
