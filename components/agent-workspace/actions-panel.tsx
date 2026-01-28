@@ -32,6 +32,7 @@ interface ActionsPanelProps {
   onCreateCase: (caseType: string, description: string) => void
   onTypify: (typification: string) => void
   onSendWhatsApp: (template: string) => void
+  currentChannel: "inbound_call" | "outbound_call" | "whatsapp" | "email"
 }
 
 const typificationOptions = [
@@ -67,13 +68,16 @@ export function ActionsPanel({
   onAddNote, 
   onCreateCase, 
   onTypify,
-  onSendWhatsApp
+  onSendWhatsApp,
+  currentChannel
 }: ActionsPanelProps) {
   const [note, setNote] = useState("")
   const [selectedTypification, setSelectedTypification] = useState("")
   const [selectedWhatsappTemplate, setSelectedWhatsappTemplate] = useState("")
   const [selectedCaseType, setSelectedCaseType] = useState("")
   const [caseDescription, setCaseDescription] = useState("")
+
+  const isVoiceChannel = currentChannel === "inbound_call" || currentChannel === "outbound_call"
 
   const handleAddNote = () => {
     if (note.trim()) {
@@ -179,37 +183,39 @@ export function ActionsPanel({
           </CardHeader>
           <CardContent className="flex-1 pt-4">
             <TabsContent value="actions" className="mt-0 space-y-5">
-              <div className="space-y-2">
-                <label className="text-xs text-muted-foreground uppercase tracking-wide font-medium flex items-center gap-2">
-                  <MessageSquare className="w-4 h-4 text-[#25D366]" />
-                  Enviar WhatsApp
-                </label>
-                <div className="flex gap-2">
-                  <Select value={selectedWhatsappTemplate} onValueChange={setSelectedWhatsappTemplate}>
-                    <SelectTrigger className="flex-1 border-[#25D366]/30 focus:ring-[#25D366]/20">
-                      <SelectValue placeholder="Seleccionar template" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {whatsappTemplates.map((template) => (
-                        <SelectItem key={template.value} value={template.value}>
-                          {template.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Button 
-                    variant="outline"
-                    className="border-[#25D366]/30 hover:bg-[#25D366]/10 hover:text-[#25D366] px-4"
-                    onClick={handleSendWhatsApp} 
-                    disabled={!selectedWhatsappTemplate}
-                  >
-                    Enviar
-                  </Button>
+              {isVoiceChannel && (
+                <div className="space-y-2">
+                  <label className="text-xs text-muted-foreground uppercase tracking-wide font-medium flex items-center gap-2">
+                    <MessageSquare className="w-4 h-4 text-[#25D366]" />
+                    Enviar WhatsApp
+                  </label>
+                  <div className="flex gap-2">
+                    <Select value={selectedWhatsappTemplate} onValueChange={setSelectedWhatsappTemplate}>
+                      <SelectTrigger className="flex-1 border-[#25D366]/30 focus:ring-[#25D366]/20">
+                        <SelectValue placeholder="Seleccionar template" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {whatsappTemplates.map((template) => (
+                          <SelectItem key={template.value} value={template.value}>
+                            {template.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Button 
+                      variant="outline"
+                      className="border-[#25D366]/30 hover:bg-[#25D366]/10 hover:text-[#25D366] px-4"
+                      onClick={handleSendWhatsApp} 
+                      disabled={!selectedWhatsappTemplate}
+                    >
+                      Enviar
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Templates aprobados para envío a clientes
+                  </p>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  Templates aprobados para envío a clientes
-                </p>
-              </div>
+              )}
 
               <div className="space-y-3 p-4 rounded-xl bg-muted/30 border border-border">
                 <label className="text-xs text-muted-foreground uppercase tracking-wide font-medium">Crear Caso en Salesforce</label>

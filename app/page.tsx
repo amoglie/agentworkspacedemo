@@ -732,6 +732,7 @@ export default function AgentWorkspace() {
               onCreateCase={handleCreateCase}
               onTypify={handleTypify}
               onSendWhatsApp={handleSendWhatsApp}
+              currentChannel={currentContact.channel}
             />
           </div>
         </div>
