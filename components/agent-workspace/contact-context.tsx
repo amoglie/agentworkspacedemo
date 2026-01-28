@@ -106,22 +106,9 @@ export function ContactContext({ contact, onCallClosure }: ContactContextProps) 
             </div>
           </div>
 
-          {isVoiceChannel && (
-            <div className="flex justify-center">
-              <Button size="default" variant="destructive" className="gap-2 rounded-full px-6" onClick={handleEndContact}>
-                <PhoneOff className="w-4 h-4" />
-                Finalizar Llamada
-              </Button>
-            </div>
-          )}
+          {isVoiceChannel && null}
 
-          {isChatChannel && (
-            <div className="flex justify-center">
-              <Button size="default" variant="destructive" className="gap-2 rounded-full px-6" onClick={handleEndContact}>
-                Finalizar Chat
-              </Button>
-            </div>
-          )}
+          {isChatChannel && null}
         </CardContent>
       </Card>
 

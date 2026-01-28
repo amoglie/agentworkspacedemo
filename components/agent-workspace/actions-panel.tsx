@@ -1,7 +1,7 @@
 "use client"
 
 import { 
-  Plus, Send, FileText, Tag, 
+  Plus, FileText, 
   MessageSquare, History, Clock, CheckCircle, AlertCircle, User,
   PhoneIncoming, PhoneOutgoing, PhoneMissed, Calendar, XCircle
 } from "lucide-react"
@@ -83,8 +83,10 @@ export function ActionsPanel({
   }
 
   const handleCreateCase = () => {
-    if (selectedCaseType && caseDescription.trim()) {
+    if (selectedTypification && selectedCaseType && caseDescription.trim()) {
+      onTypify(selectedTypification)
       onCreateCase(selectedCaseType, caseDescription)
+      setSelectedTypification("")
       setSelectedCaseType("")
       setCaseDescription("")
     }
@@ -178,32 +180,6 @@ export function ActionsPanel({
           <CardContent className="flex-1 pt-4">
             <TabsContent value="actions" className="mt-0 space-y-5">
               <div className="space-y-2">
-                <label className="text-xs text-muted-foreground uppercase tracking-wide font-medium">Tipificación</label>
-                <div className="flex gap-2">
-                  <Select value={selectedTypification} onValueChange={setSelectedTypification}>
-                    <SelectTrigger className="flex-1">
-                      <SelectValue placeholder="Seleccionar tipificación" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {typificationOptions.map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Button 
-                    size="icon" 
-                    variant="outline" 
-                    onClick={handleTypify} 
-                    disabled={!selectedTypification}
-                  >
-                    <Tag className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-
-              <div className="space-y-2">
                 <label className="text-xs text-muted-foreground uppercase tracking-wide font-medium flex items-center gap-2">
                   <MessageSquare className="w-4 h-4 text-[#25D366]" />
                   Enviar WhatsApp
@@ -222,13 +198,12 @@ export function ActionsPanel({
                     </SelectContent>
                   </Select>
                   <Button 
-                    size="icon" 
                     variant="outline"
-                    className="border-[#25D366]/30 hover:bg-[#25D366]/10 hover:text-[#25D366]"
+                    className="border-[#25D366]/30 hover:bg-[#25D366]/10 hover:text-[#25D366] px-4"
                     onClick={handleSendWhatsApp} 
                     disabled={!selectedWhatsappTemplate}
                   >
-                    <Send className="w-4 h-4" />
+                    Enviar
                   </Button>
                 </div>
                 <p className="text-xs text-muted-foreground">
@@ -236,31 +211,56 @@ export function ActionsPanel({
                 </p>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-xs text-muted-foreground uppercase tracking-wide font-medium">Crear Caso</label>
-                <Select value={selectedCaseType} onValueChange={setSelectedCaseType}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Tipo de caso" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {caseTypes.map((type) => (
-                      <SelectItem key={type.value} value={type.value}>
-                        {type.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Textarea
-                  placeholder="Descripción del caso..."
-                  value={caseDescription}
-                  onChange={(e) => setCaseDescription(e.target.value)}
-                  className="resize-none"
-                  rows={2}
-                />
+              <div className="space-y-3 p-4 rounded-xl bg-muted/30 border border-border">
+                <label className="text-xs text-muted-foreground uppercase tracking-wide font-medium">Crear Caso en Salesforce</label>
+                
+                <div className="space-y-2">
+                  <label className="text-xs text-muted-foreground">Tipificación</label>
+                  <Select value={selectedTypification} onValueChange={setSelectedTypification}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar tipificación" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {typificationOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs text-muted-foreground">Tipo de Caso</label>
+                  <Select value={selectedCaseType} onValueChange={setSelectedCaseType}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar tipo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {caseTypes.map((type) => (
+                        <SelectItem key={type.value} value={type.value}>
+                          {type.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs text-muted-foreground">Descripción</label>
+                  <Textarea
+                    placeholder="Descripción del caso..."
+                    value={caseDescription}
+                    onChange={(e) => setCaseDescription(e.target.value)}
+                    className="resize-none"
+                    rows={3}
+                  />
+                </div>
+
                 <Button 
                   className="w-full gap-2 rounded-full" 
                   onClick={handleCreateCase}
-                  disabled={!selectedCaseType || !caseDescription.trim()}
+                  disabled={!selectedTypification || !selectedCaseType || !caseDescription.trim()}
                 >
                   <Plus className="w-4 h-4" />
                   Crear Caso
