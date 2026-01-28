@@ -3,6 +3,7 @@
 import { useState, useCallback } from "react"
 import { WorkspaceHeader } from "@/components/agent-workspace/workspace-header"
 import { ContactContext } from "@/components/agent-workspace/contact-context"
+import { OutboundContact } from "@/components/agent-workspace/outbound-contact"
 import { CustomerPanel, type CustomerData } from "@/components/agent-workspace/customer-panel"
 import { ActionsPanel } from "@/components/agent-workspace/actions-panel"
 import { OutboundTasksPanel, type OutboundTask } from "@/components/agent-workspace/outbound-tasks-panel"
@@ -364,8 +365,28 @@ export default function AgentWorkspace() {
 
   const [selectedChatId, setSelectedChatId] = useState<string>(mockContacts.chat_inbound.id)
 
+  // Outbound customer selection
+  const outboundCustomersList = [
+    { id: "CLI-2024-567891", name: "Juan Pérez Rodríguez", phone: "+34 655 123 456", email: "juan.perez@email.com", segment: "Standard" },
+    { id: "CLI-2024-567893", name: "Carlos Sánchez", phone: "+34 677 345 678", email: "carlos.sanchez@email.com", segment: "Premium" },
+    { id: "CLI-2024-567894", name: "Laura Fernández", phone: "+34 688 456 789", email: "laura.fernandez@email.com", segment: "VIP" },
+    { id: "CLI-2024-567897", name: "Roberto Gómez Silva", phone: "+34 688 111 222", email: "roberto.gomez@email.com", segment: "Standard" },
+  ]
+
+  const [selectedOutboundCallCustomer, setSelectedOutboundCallCustomer] = useState<string>("")
+  const [selectedOutboundChatCustomer, setSelectedOutboundChatCustomer] = useState<string>("")
+  const [isOutboundCallActive, setIsOutboundCallActive] = useState(false)
+  const [isOutboundChatActive, setIsOutboundChatActive] = useState(false)
+  const [outboundCallStartTime, setOutboundCallStartTime] = useState<Date | undefined>()
+  const [outboundChatStartTime, setOutboundChatStartTime] = useState<Date | undefined>()
+
   const currentContact = contacts[currentView]
   const currentCustomer = customers[currentView]
+  
+  // For outbound views, only show customer data if contact is active
+  const showCustomerData = currentView === "inbound_call" || currentView === "chat_inbound" || 
+    (currentView === "outbound_call" && isOutboundCallActive) ||
+    (currentView === "chat_outbound" && isOutboundChatActive)
   
   // Check if there's an active voice call
   const hasActiveVoiceCall = activeContacts.some(c => c.channel === "inbound_call" || c.channel === "outbound_call")
@@ -389,6 +410,21 @@ export default function AgentWorkspace() {
       ))
     }
   }, [activeChats])
+
+  // Handle outbound contact initiation
+  const handleInitiateOutboundCall = useCallback(() => {
+    if (selectedOutboundCallCustomer) {
+      setIsOutboundCallActive(true)
+      setOutboundCallStartTime(new Date())
+    }
+  }, [selectedOutboundCallCustomer])
+
+  const handleInitiateOutboundChat = useCallback(() => {
+    if (selectedOutboundChatCustomer) {
+      setIsOutboundChatActive(true)
+      setOutboundChatStartTime(new Date())
+    }
+  }, [selectedOutboundChatCustomer])
 
   const handleStatusChange = useCallback((status: typeof agent.status) => {
     setAgent((prev) => ({ ...prev, status }))
@@ -428,8 +464,9 @@ export default function AgentWorkspace() {
     setHistory((prev) => [historyItem, ...prev])
   }, [agent.name, currentView])
 
-  const handleInitiateOutboundCall = useCallback((task: OutboundTask) => {
+  const handleInitiateOutboundCallFromTask = useCallback((task: OutboundTask) => {
     setCurrentView("outbound_call")
+    setSelectedOutboundCallCustomer(task.customerId)
     setContacts((prev) => ({
       ...prev,
       outbound_call: {
@@ -454,6 +491,8 @@ export default function AgentWorkspace() {
         t.id === task.id ? { ...t, status: "in_progress" as const, attempts: t.attempts + 1 } : t
       )
     )
+    setIsOutboundCallActive(true)
+    setOutboundCallStartTime(new Date())
   }, [])
 
   const handleSkipTask = useCallback((taskId: string) => {
@@ -626,11 +665,35 @@ export default function AgentWorkspace() {
       <main className="flex-1 p-6 overflow-hidden">
         <div className="h-full grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-1 min-h-0 overflow-auto flex flex-col gap-4">
-            <ContactContext contact={currentContact} onCallClosure={handleCallClosure} />
+            {(currentView === "inbound_call" || currentView === "chat_inbound") && (
+              <ContactContext contact={currentContact} onCallClosure={handleCallClosure} />
+            )}
+            {currentView === "outbound_call" && (
+              <OutboundContact
+                channel="outbound_call"
+                customers={outboundCustomersList}
+                selectedCustomerId={selectedOutboundCallCustomer}
+                isContactActive={isOutboundCallActive}
+                contactStartTime={outboundCallStartTime}
+                onSelectCustomer={setSelectedOutboundCallCustomer}
+                onInitiateContact={handleInitiateOutboundCall}
+              />
+            )}
+            {currentView === "chat_outbound" && (
+              <OutboundContact
+                channel="whatsapp"
+                customers={outboundCustomersList}
+                selectedCustomerId={selectedOutboundChatCustomer}
+                isContactActive={isOutboundChatActive}
+                contactStartTime={outboundChatStartTime}
+                onSelectCustomer={setSelectedOutboundChatCustomer}
+                onInitiateContact={handleInitiateOutboundChat}
+              />
+            )}
             {currentView === "outbound_call" && (
               <OutboundTasksPanel
                 tasks={outboundTasks}
-                onInitiateCall={handleInitiateOutboundCall}
+                onInitiateCall={handleInitiateOutboundCallFromTask}
                 onSkipTask={handleSkipTask}
                 onRescheduleTask={handleRescheduleTask}
               />
@@ -645,7 +708,21 @@ export default function AgentWorkspace() {
           </div>
           
           <div className="lg:col-span-1 min-h-0 overflow-auto">
-            <CustomerPanel customer={currentCustomer} onUpdateCustomer={handleUpdateCustomer} />
+            {showCustomerData ? (
+              <CustomerPanel customer={currentCustomer} onUpdateCustomer={handleUpdateCustomer} />
+            ) : (
+              <div className="h-full flex items-center justify-center">
+                <div className="text-center p-8">
+                  <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
+                    <Phone className="w-8 h-8 text-muted-foreground" />
+                  </div>
+                  <h3 className="text-lg font-medium text-foreground mb-2">Sin cliente seleccionado</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Selecciona un cliente para ver su información
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
           
           <div className="lg:col-span-1 min-h-0 overflow-auto">
